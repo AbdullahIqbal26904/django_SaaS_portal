@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Service Package - SaaS Portal{% endblock %}
+{% block header_title %}Edit Service Package{% endblock %}
+{% block nav_packages_active %}active{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <div class="card-title">
+        <h2>Edit Service Package: {{ package.name }}</h2>
+    </div>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="name" class="form-label">Package Name *</label>
+            <input type="text" id="name" name="name" class="form-control" value="{{ package.name }}" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="description" class="form-label">Description *</label>
+            <textarea id="description" name="description" class="form-control" required>{{ package.description }}</textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="price" class="form-label">Price *</label>
+            <input type="number" id="price" name="price" step="0.01" min="0" class="form-control" value="{{ package.price }}" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="billing_cycle" class="form-label">Billing Cycle *</label>
+            <select id="billing_cycle" name="billing_cycle" class="form-control" required>
+                <option value="monthly" {% if package.billing_cycle == 'monthly' %}selected{% endif %}>Monthly</option>
+                <option value="quarterly" {% if package.billing_cycle == 'quarterly' %}selected{% endif %}>Quarterly</option>
+                <option value="yearly" {% if package.billing_cycle == 'yearly' %}selected{% endif %}>Yearly</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="features" class="form-label">Features (JSON format)</label>
+            <textarea id="features" name="features" class="form-control">{{ package.features|safe }}</textarea>
+            <small style="color: var(--secondary-color);">Enter features in JSON format with feature name as key and value as value.</small>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">
+                <input type="checkbox" id="is_active" name="is_active" {% if package.is_active %}checked{% endif %}>
+                Active Package
+            </label>
+            <small style="display: block; color: var(--secondary-color);">When unchecked, this package will not be displayed in the catalog.</small>
+        </div>
+        
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+            <a href="{% url 'package_detail' package.id %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

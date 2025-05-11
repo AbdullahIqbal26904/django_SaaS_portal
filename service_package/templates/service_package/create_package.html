@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Create Service Package - SaaS Portal{% endblock %}
+{% block header_title %}Create New Service Package{% endblock %}
+{% block nav_packages_active %}active{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <div class="card-title">
+        <h2>Create New Service Package</h2>
+    </div>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="name" class="form-label">Package Name *</label>
+            <input type="text" id="name" name="name" class="form-control" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="description" class="form-label">Description *</label>
+            <textarea id="description" name="description" class="form-control" required></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="price" class="form-label">Price *</label>
+            <input type="number" id="price" name="price" step="0.01" min="0" class="form-control" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="billing_cycle" class="form-label">Billing Cycle *</label>
+            <select id="billing_cycle" name="billing_cycle" class="form-control" required>
+                <option value="monthly">Monthly</option>
+                <option value="quarterly">Quarterly</option>
+                <option value="yearly">Yearly</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="features" class="form-label">Features (JSON format)</label>
+            <textarea id="features" name="features" class="form-control">{
+    "users": "10",
+    "storage": "5GB",
+    "support": "Email"
+}</textarea>
+            <small style="color: var(--secondary-color);">Enter features in JSON format with feature name as key and value as value.</small>
+        </div>
+        
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+            <a href="{% url 'package_list' %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Create Package</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

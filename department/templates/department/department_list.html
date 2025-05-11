@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Departments - SaaS Portal{% endblock %}
+{% block header_title %}Departments{% endblock %}
+{% block nav_departments_active %}active{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <div class="card-title">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>Department List</h2>
+            {% if is_root_admin %}
+            <a href="{% url 'create_department' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create Department
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if departments %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Created At</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dept in departments %}
+            <tr>
+                <td>{{ dept.name }}</td>
+                <td>{{ dept.description|truncatechars:50 }}</td>
+                <td>{{ dept.created_at|date:"M d, Y" }}</td>
+                <td>
+                    <a href="{% url 'department_detail' dept.department_id %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="alert alert-info">
+        No departments found.
+        {% if is_root_admin %}
+        <a href="{% url 'create_department' %}">Create your first department</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
