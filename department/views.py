@@ -115,6 +115,7 @@ def add_department_admin(request, department_id):
     """
     Add a user as department admin (root admin only)
     """
+    print('add department admin requested.')
     if not request.user.is_root_admin:
         return Response({"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN)
     

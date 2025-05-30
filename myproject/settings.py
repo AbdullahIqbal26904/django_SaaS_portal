@@ -48,6 +48,9 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
 
     'rest_framework',
+    'rest_framework_simplejwt',
+    'drf_yasg',
+    'corsheaders',
     
     # Our custom apps
     'department',
@@ -94,6 +97,7 @@ SOCIALACCOUNT_PROVIDERS = {
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",  # CORS middleware before CommonMiddleware
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -103,12 +107,46 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',
     "user.middleware.JWTAuthenticationMiddleware",
 ]
-
+# Add these settings for allauth
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None  # Tell allauth you're not using usernames
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False  # Username not required
+ACCOUNT_AUTHENTICATION_METHOD = 'email'  # Use email for authentication
 # Authentication backends
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 )
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Next.js dev server
+    "https://yourdomain.com",  # Production domain
+]
+
+# Allow credentials (cookies)
+CORS_ALLOW_CREDENTIALS = True
+
+# Additional CORS settings for Next.js frontend
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 ROOT_URLCONF = "myproject.urls"
 
@@ -138,6 +176,8 @@ ACCOUNT_LOGOUT_ON_GET = True  # Allow logout without confirmation
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/login/'
 SOCIALACCOUNT_LOGIN_ON_GET = True  # Skip the intermediate allauth confirmation page
+SOCIALACCOUNT_STORE_TOKENS = True
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'  # Change to 'https' in production
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
