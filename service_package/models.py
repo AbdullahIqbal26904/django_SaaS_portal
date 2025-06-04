@@ -40,12 +40,20 @@ class Subscription(models.Model):
         ('pending', 'Pending'),
     )
     
+    SOURCE_CHOICES = (
+        ('direct', 'Direct Subscription'),
+        ('reseller', 'Via Reseller'),
+    )
+    
     id = models.AutoField(primary_key=True)
     department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='subscriptions')
     service_package = models.ForeignKey(ServicePackage, on_delete=models.CASCADE, related_name='subscriptions')
     start_date = models.DateField()
     end_date = models.DateField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    subscription_source = models.CharField(max_length=20, choices=SOURCE_CHOICES, default='direct')
+    reseller = models.ForeignKey('reseller.Reseller', on_delete=models.SET_NULL, related_name='subscriptions', 
+                                null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

@@ -5,9 +5,15 @@ class Department(models.Model):
     """
     Department model to organize users in the SaaS platform.
     """
+    CUSTOMER_TYPE_CHOICES = (
+        ('direct', 'Direct Customer'),
+        ('reseller', 'Reseller Customer'),
+    )
+    
     department_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
+    customer_type = models.CharField(max_length=20, choices=CUSTOMER_TYPE_CHOICES, default='direct')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

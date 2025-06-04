@@ -19,6 +19,8 @@ def get_tokens_for_user(user):
     refresh['user_id'] = user.user_id
     refresh['email'] = user.email
     refresh['is_root_admin'] = user.is_root_admin
+    refresh['is_reseller_admin'] = user.is_reseller_admin
+    refresh['user_type'] = user.user_type
     
     return {
         'refresh': str(refresh),
@@ -32,6 +34,29 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Filter users based on user permissions"""
+        user = self.request.user
+        
+        # Root admins can see all users
+        if user.is_root_admin:
+            return User.objects.all()
+        
+        # Reseller admins can see users in their departments
+        if user.is_reseller_admin:
+            from reseller.models import ResellerAdmin, ResellerCustomer
+            reseller_admin = ResellerAdmin.objects.filter(user=user).first()
+            if reseller_admin:
+                # Get all departments under this reseller
+                departments = ResellerCustomer.objects.filter(
+                    reseller=reseller_admin.reseller
+                ).values_list('department', flat=True)
+                # Return all users in those departments
+                return User.objects.filter(departments__department__in=departments).distinct()
+        
+        # Regular users can only see themselves
+        return User.objects.filter(user_id=user.user_id)
     
     def get_serializer_class(self):
         if self.action == 'create':
@@ -86,19 +111,77 @@ class LoginAPIView(APIView):
 class RegisterAPIView(APIView):
     """
     API endpoint for user registration
+    
+    Supports two workflows:
+    1. Direct customer registration (default)
+    2. Reseller customer registration (when reseller_id is provided)
     """
-    permission_classes = []  # Allow unauthenticated access
+    permission_classes = []  # Allow unauthenticated access for direct customer registration
     
     def post(self, request):
+        # Check if this is a reseller registration
+        reseller_id = request.data.get('reseller_id')
+        
+        if reseller_id:
+            # For reseller customers, permission check is required
+            if not request.user.is_authenticated:
+                return Response({"error": "Authentication required for reseller customer registration"}, 
+                              status=status.HTTP_401_UNAUTHORIZED)
+            
+            # Verify the reseller exists
+            from reseller.models import Reseller, ResellerAdmin, ResellerCustomer
+            try:
+                reseller = Reseller.objects.get(reseller_id=reseller_id)
+            except Reseller.DoesNotExist:
+                return Response({"error": "Reseller not found"}, status=status.HTTP_404_NOT_FOUND)
+            
+            # Check if current user is a root admin or an admin for this reseller
+            if not (request.user.is_root_admin or 
+                    ResellerAdmin.objects.filter(user=request.user, reseller=reseller).exists()):
+                return Response({"error": "You don't have permission to register customers for this reseller"}, 
+                              status=status.HTTP_403_FORBIDDEN)
+        
+        # Register the user
         serializer = UserCreateSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.save()
+            # Set user type based on registration path
+            if reseller_id:
+                user = serializer.save(user_type='reseller')
+            else:
+                user = serializer.save(user_type='direct')
+            
             tokens = get_tokens_for_user(user)
             response_data = {
                 'user': UserSerializer(user).data,
                 'tokens': tokens
             }
+            
+            # If this is a reseller registration, create department and link it to reseller
+            if reseller_id:
+                from reseller.models import Reseller, ResellerCustomer
+                from department.models import Department
+                
+                # Create a department for this customer
+                department_name = request.data.get('department_name', f"{user.full_name}'s Department")
+                department = Department.objects.create(
+                    name=department_name,
+                    description=f"Department for {user.full_name}",
+                    customer_type='reseller'
+                )
+                
+                # Link department to reseller
+                ResellerCustomer.objects.create(
+                    reseller=reseller,
+                    department=department,
+                    is_active=True
+                )
+                
+                # Add department info to response
+                from department.serializers import DepartmentSerializer
+                response_data['department'] = DepartmentSerializer(department).data
+            
             return Response(response_data, status=status.HTTP_201_CREATED)
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])

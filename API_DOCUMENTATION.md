@@ -2,6 +2,8 @@
 
 This document outlines the API endpoints available for integration with your Next.js frontend.
 
+> **Note**: See [RESELLER_API_DOCUMENTATION.md](./RESELLER_API_DOCUMENTATION.md) for detailed documentation on the reseller/partner layer functionality.
+
 ## Authentication Endpoints
 
 ### Login
@@ -22,6 +24,8 @@ This document outlines the API endpoints available for integration with your Nex
       "email": "user@example.com",
       "full_name": "User Name",
       "is_root_admin": false,
+      "is_reseller_admin": false,
+      "user_type": "direct",
       "mfa_enabled": false,
       "created_at": "2025-05-30T00:00:00Z"
     },
@@ -35,7 +39,7 @@ This document outlines the API endpoints available for integration with your Nex
 ### Register
 - **URL:** `/api/users/auth/register/`
 - **Method:** `POST`
-- **Body:**
+- **Body for Direct Customer Registration:**
   ```json
   {
     "email": "newuser@example.com",
@@ -43,7 +47,17 @@ This document outlines the API endpoints available for integration with your Nex
     "password": "securepassword"
   }
   ```
-- **Response:** Same as login
+- **Body for Reseller Customer Registration (requires authentication):**
+  ```json
+  {
+    "email": "customer@example.com",
+    "full_name": "Reseller Customer",
+    "password": "securepassword",
+    "reseller_id": 1,
+    "department_name": "Customer Department" // Optional, defaults to user's name + Department
+  }
+  ```
+- **Response:** Same as login with additional department info for reseller registrations
 
 ### Refresh Token
 - **URL:** `/api/token/refresh/`

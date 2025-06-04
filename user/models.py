@@ -22,10 +22,17 @@ class UserManager(BaseUserManager):
 class User(AbstractUser):
     # Keep the default fields from AbstractUser (id, password, is_staff, is_superuser, etc.)
     # Add and customize fields
+    USER_TYPE_CHOICES = (
+        ('direct', 'Direct User'),
+        ('reseller', 'Reseller User'),
+    )
+    
     user_id = models.AutoField(primary_key=True)
     full_name = models.CharField(max_length=100)
     email = models.EmailField(max_length=255, unique=True)
     is_root_admin = models.BooleanField(default=False)
+    is_reseller_admin = models.BooleanField(default=False)
+    user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES, default='direct')
     mfa_enabled = models.BooleanField(default=False)
     oauth_provider = models.CharField(max_length=50, null=True, blank=True)
     oauth_provider_id = models.CharField(max_length=255, null=True, blank=True)

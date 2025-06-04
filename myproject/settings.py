@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     # Our custom apps
     'department',
     'service_package',
+    'reseller',
 ]
 
 # JWT Settings

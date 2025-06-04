@@ -12,12 +12,21 @@ class ServicePackageSerializer(serializers.ModelSerializer):
 class SubscriptionSerializer(serializers.ModelSerializer):
     department_details = DepartmentSerializer(source='department', read_only=True)
     service_package_details = ServicePackageSerializer(source='service_package', read_only=True)
+    reseller_details = serializers.SerializerMethodField(read_only=True)
     
     class Meta:
         model = Subscription
         fields = ['id', 'department', 'service_package', 'status', 'start_date', 'end_date', 
-                 'created_at', 'updated_at', 'department_details', 'service_package_details']
-        read_only_fields = ['id', 'created_at', 'updated_at', 'department_details', 'service_package_details']
+                 'subscription_source', 'reseller', 'created_at', 'updated_at', 
+                 'department_details', 'service_package_details', 'reseller_details']
+        read_only_fields = ['id', 'created_at', 'updated_at', 'department_details', 
+                           'service_package_details', 'reseller_details']
+    
+    def get_reseller_details(self, obj):
+        if obj.reseller:
+            from reseller.serializers import ResellerSerializer
+            return ResellerSerializer(obj.reseller).data
+        return None
 
 class ServiceAccessSerializer(serializers.ModelSerializer):
     user_details = UserSerializer(source='user', read_only=True)

@@ -45,6 +45,20 @@ class SubscriptionViewSet(viewsets.ModelViewSet):
         # Root admins can see all subscriptions
         if user.is_root_admin:
             return Subscription.objects.all()
+        
+        # Reseller admins can see subscriptions for their customers
+        if user.is_reseller_admin:
+            from reseller.models import ResellerAdmin, ResellerCustomer
+            reseller_admin = ResellerAdmin.objects.filter(user=user).first()
+            if reseller_admin:
+                # Get all departments under this reseller
+                departments = ResellerCustomer.objects.filter(
+                    reseller=reseller_admin.reseller
+                ).values_list('department', flat=True)
+                # Return subscriptions for those departments
+                return Subscription.objects.filter(
+                    department__in=departments
+                ).order_by('-created_at')
             
         # Department admins can see their department's subscriptions
         admin_departments = Department.objects.filter(admins__user=user)
