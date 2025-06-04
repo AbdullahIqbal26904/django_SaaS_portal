@@ -1,5 +1,5 @@
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
 from rest_framework import status, viewsets
 from rest_framework.views import APIView
@@ -8,13 +8,69 @@ from .models import Department, DepartmentAdmin, DepartmentUser
 from .serializers import DepartmentSerializer, DepartmentDetailSerializer, DepartmentAdminSerializer, DepartmentUserSerializer
 from user.models import User
 
+# Custom permission classes
+class IsAdminOrDepartmentAdmin(BasePermission):
+    """
+    Permission class to check if the user is a root admin or a department admin.
+    For GET operations on departments endpoints, normal users are allowed access.
+    """
+    def has_permission(self, request, view):
+        # Root admins have full permission
+        if request.user.is_root_admin:
+            return True
+            
+        # For list and retrieve operations, allow all authenticated users
+        if request.method == 'GET':
+            return True
+            
+        # For create operations, only root admins and department admins can create
+        if view.action == 'create':
+            return request.user.is_root_admin or DepartmentAdmin.objects.filter(user=request.user).exists()
+            
+        # For detail actions (update, delete), check in has_object_permission
+        return True
+    
+    def has_object_permission(self, request, view, obj):
+        # Root admins have full permission
+        if request.user.is_root_admin:
+            return True
+            
+        # For GET operations, allow all authenticated users
+        if request.method == 'GET':
+            return True
+        
+        # For update or delete operations, check if user is department admin
+        return DepartmentAdmin.objects.filter(user=request.user, department=obj).exists()
+
 # Department ViewSet
 class DepartmentViewSet(viewsets.ModelViewSet):
     """
     API endpoint for departments
     """
     queryset = Department.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAdminOrDepartmentAdmin]
+    
+    def get_queryset(self):
+        """
+        Filter departments based on user permissions:
+        - Root admins see all departments
+        - Department admins see their departments
+        - Regular users see departments they are members of
+        """
+        user = self.request.user
+        
+        # Root admins can see all departments
+        if user.is_root_admin:
+            return Department.objects.all()
+            
+        # Get departments where user is an admin
+        admin_departments = Department.objects.filter(departmentadmin__user=user)
+        
+        # Get departments where user is a member
+        member_departments = Department.objects.filter(departmentuser__user=user)
+        
+        # Combine querysets and remove duplicates
+        return (admin_departments | member_departments).distinct()
     
     def get_serializer_class(self):
         if self.action == 'retrieve':

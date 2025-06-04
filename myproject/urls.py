@@ -41,9 +41,8 @@ schema_view = get_schema_view(
 urlpatterns = [
     path("admin/", admin.site.urls),
     
-    # Regular URL endpoints (to be removed or modified if not needed in API-only backend)
+    # Redirect root to API docs
     path('', RedirectView.as_view(url='/api/docs/'), name='home'),
-    path('accounts/', include('allauth.urls')),
     
     # API endpoints
     path('api/', include('myproject.api_urls')),

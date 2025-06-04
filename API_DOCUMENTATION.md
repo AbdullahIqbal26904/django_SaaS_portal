@@ -85,6 +85,7 @@ This document outlines the API endpoints available for integration with your Nex
 - **URL:** `/api/departments/departments/`
 - **Method:** `GET`
 - **Auth Required:** Yes
+- **Access:** All authenticated users (including normal users)
 - **Response:**
   ```json
   [
@@ -124,6 +125,7 @@ This document outlines the API endpoints available for integration with your Nex
 - **URL:** `/api/departments/departments/{id}/`
 - **Method:** `GET`
 - **Auth Required:** Yes
+- **Access:** All authenticated users (including normal users)
 - **Response:**
   ```json
   {
