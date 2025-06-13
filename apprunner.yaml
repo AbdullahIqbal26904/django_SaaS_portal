@@ -1,0 +1,27 @@
+version: 1.0
+runtime: python3
+build:
+  commands:
+    build:
+      - pip install -r requirements.txt
+      - python manage.py collectstatic --noinput
+run:
+  command: gunicorn myproject.wsgi:application --bind 0.0.0.0:8000
+  network:
+    port: 8000
+    env: PORT
+  env:
+    - name: DB_NAME
+      value: saas_portal
+    - name: DB_USER
+      value: postgres
+    - name: DB_PASSWORD
+      value: Alpha123
+    - name: DB_HOST
+      value: saas-portal-db.cdioocgoyyej.eu-north-1.rds.amazonaws.com
+    - name: DB_PORT
+      value: 5432
+    - name: DEBUG
+      value: False
+    - name: SECRET_KEY
+      value: your-secret-key-here

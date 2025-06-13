@@ -24,9 +24,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-wb&+eocg#@n!ibo!!)(4lnectprt-_(a0_q9=8lz#chccqx$%%"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# filepath: myproject/settings.py
+DEBUG = False
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = ['*.awsapprunner.com', 'localhost,127.0.0.1'] 
+
 
 
 # Application definition
@@ -108,6 +111,12 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',
     "user.middleware.JWTAuthenticationMiddleware",
 ]
+
+# Static files configuration
+STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
 # Add these settings for allauth
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None  # Tell allauth you're not using usernames
 ACCOUNT_EMAIL_REQUIRED = True
@@ -186,11 +195,11 @@ ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'  # Change to 'https' in production
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'saas_portal',
-        'USER': 'postgres',
-        'PASSWORD': '1234',
-        'HOST': 'localhost',  # or your RDS endpoint
-        'PORT': '5432',
+        'NAME': os.environ.get('DB_NAME', 'saas_portal'),
+        'USER': os.environ.get('DB_USER', 'postgres'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'Alpha123'),
+        'HOST': os.environ.get('DB_HOST', 'saas-portal-db.cdioocgoyyej.eu-north-1.rds.amazonaws.com'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
     }
 }
 
