@@ -22,6 +22,16 @@ def get_tokens_for_user(user):
     refresh['is_reseller_admin'] = user.is_reseller_admin
     refresh['user_type'] = user.user_type
     
+    # Add department admin claims
+    from department.models import DepartmentAdmin
+    is_department_admin = DepartmentAdmin.objects.filter(user=user).exists()
+    refresh['is_department_admin'] = is_department_admin
+    
+    # If user is a department admin, include the departments they manage
+    if is_department_admin:
+        managed_departments = DepartmentAdmin.objects.filter(user=user).values_list('department_id', flat=True)
+        refresh['managed_departments'] = list(managed_departments)
+    
     return {
         'refresh': str(refresh),
         'access': str(refresh.access_token),
@@ -98,10 +108,26 @@ class LoginAPIView(APIView):
             
             if user:
                 tokens = get_tokens_for_user(user)
+                user_data = UserSerializer(user).data
+                
                 response_data = {
-                    'user': UserSerializer(user).data,
+                    'user': user_data,
                     'tokens': tokens
                 }
+                
+                # If user is a department admin, include detailed department information
+                from department.models import DepartmentAdmin
+                if user_data.get('is_department_admin'):
+                    from department.serializers import DepartmentDetailSerializer
+                    
+                    # Get departments where user is an admin
+                    department_admins = DepartmentAdmin.objects.filter(user=user)
+                    departments = [admin.department for admin in department_admins]
+                    
+                    # Serialize departments with detailed information
+                    department_data = DepartmentDetailSerializer(departments, many=True).data
+                    response_data['admin_departments'] = department_data
+                
                 return Response(response_data, status=status.HTTP_200_OK)
             
             return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)

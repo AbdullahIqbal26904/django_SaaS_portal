@@ -48,3 +48,27 @@ class User(AbstractUser):
     
     def __str__(self):
         return self.email
+        
+    def is_department_admin(self, department_id=None):
+        """
+        Check if the user is a department admin.
+        If department_id is provided, check for that specific department.
+        Otherwise, check if user is admin for any department.
+        """
+        from department.models import DepartmentAdmin
+        
+        if department_id:
+            return DepartmentAdmin.objects.filter(
+                user=self, 
+                department_id=department_id
+            ).exists()
+        
+        return DepartmentAdmin.objects.filter(user=self).exists()
+    
+    def get_administered_departments(self):
+        """
+        Return a queryset of departments where the user is an admin
+        """
+        from department.models import Department
+        
+        return Department.objects.filter(admins__user=self)

@@ -14,4 +14,7 @@ urlpatterns = [
     path('departments/<int:department_id>/admins/', api_views.DepartmentAdminAPI.as_view(), name='department_admin_api'),
     path('departments/<int:department_id>/users/', api_views.DepartmentUserAPI.as_view(), name='department_user_api'),
     path('departments/<int:department_id>/users/<int:user_id>/', api_views.DepartmentUserAPI.as_view(), name='department_user_detail_api'),
+    
+    # Department admin user endpoint
+    path('me/admin/', api_views.DepartmentAdminUserAPI.as_view(), name='department_admin_user_api'),
 ]

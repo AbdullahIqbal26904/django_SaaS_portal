@@ -25,6 +25,7 @@ This document outlines the API endpoints available for integration with your Nex
       "full_name": "User Name",
       "is_root_admin": false,
       "is_reseller_admin": false,
+      "is_department_admin": true,
       "user_type": "direct",
       "mfa_enabled": false,
       "created_at": "2025-05-30T00:00:00Z"
@@ -32,9 +33,21 @@ This document outlines the API endpoints available for integration with your Nex
     "tokens": {
       "refresh": "refresh_token_value",
       "access": "access_token_value"
-    }
+    },
+    "admin_departments": [
+      {
+        "department_id": 1,
+        "name": "Marketing",
+        "description": "Marketing department",
+        "created_at": "2025-05-30T00:00:00Z",
+        "updated_at": "2025-05-30T00:00:00Z",
+        "admins": [...],
+        "users": [...]
+      }
+    ]
   }
   ```
+  > **Note**: The `admin_departments` field is only included when the user is a department admin
 
 ### Register
 - **URL:** `/api/users/auth/register/`

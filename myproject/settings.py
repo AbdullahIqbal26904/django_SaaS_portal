@@ -186,7 +186,7 @@ ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'  # Change to 'https' in production
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'practice_database',
+        'NAME': 'saas_portal',
         'USER': 'postgres',
         'PASSWORD': '1234',
         'HOST': 'localhost',  # or your RDS endpoint

@@ -221,3 +221,36 @@ class DepartmentUserAPI(APIView):
         dept_user.delete()
         
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+# Department Admin User API
+class DepartmentAdminUserAPI(APIView):
+    """
+    API endpoint to check if the current user is a department admin
+    and return their administered departments
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        """Get current user's department admin status and departments"""
+        user = request.user
+        
+        # Check if user is a department admin
+        is_department_admin = DepartmentAdmin.objects.filter(user=user).exists()
+        
+        if not is_department_admin:
+            return Response({
+                "is_department_admin": False,
+                "departments": []
+            })
+        
+        # Get departments where user is an admin
+        department_admins = DepartmentAdmin.objects.filter(user=user)
+        departments = [admin.department for admin in department_admins]
+        
+        # Serialize departments with detailed information
+        department_data = DepartmentDetailSerializer(departments, many=True).data
+        
+        return Response({
+            "is_department_admin": True,
+            "departments": department_data
+        })
