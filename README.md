@@ -46,16 +46,29 @@ A multi-tenant SaaS portal for managing departments, users, and service packages
    ```
    pip install -r requirements.txt
    ```
-4. Configure database settings in `myproject/settings.py`
-5. Run migrations:
+4. Create a `.env` file in the project root with the following variables:
+   ```
+   SECRET_KEY=your_secret_key
+   DEBUG=True
+   ALLOWED_HOSTS=localhost,127.0.0.1
+
+   # Database Configuration
+   DB_NAME=saas_portal
+   DB_USER=your_db_user
+   DB_PASSWORD=your_db_password
+   DB_HOST=your_db_host
+   DB_PORT=5432
+   ```
+5. Configure database settings in `myproject/settings.py`
+6. Run migrations:
    ```
    python manage.py migrate
    ```
-6. Create a superuser:
+7. Create a superuser:
    ```
    python manage.py createsuperuser
    ```
-7. Run the development server:
+8. Run the development server:
    ```
    python manage.py runserver
    ```
