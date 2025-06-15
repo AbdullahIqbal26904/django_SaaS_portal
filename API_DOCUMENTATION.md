@@ -106,6 +106,74 @@ This document outlines the API endpoints available for integration with your Nex
   }
   ```
 
+### List All Users (Root Admin Only)
+- **URL:** `/api/users/users/`
+- **Method:** `GET`
+- **Auth Required:** Yes (Root Admin only)
+- **Response:**
+  ```json
+  [
+    {
+      "user_id": 1,
+      "email": "user@example.com",
+      "full_name": "User Name",
+      "is_root_admin": false,
+      "is_reseller_admin": false,
+      "is_department_admin": true,
+      "mfa_enabled": false,
+      "created_at": "2025-05-30T00:00:00Z",
+      "user_type": "direct"
+    }
+  ]
+  ```
+
+### Get User Detail
+- **URL:** `/api/users/users/{id}/`
+- **Method:** `GET`
+- **Auth Required:** Yes (Root Admin only or self)
+- **Response:**
+  ```json
+  {
+    "user_id": 1,
+    "email": "user@example.com",
+    "full_name": "User Name",
+    "is_root_admin": false,
+    "is_reseller_admin": false,
+    "is_department_admin": true,
+    "mfa_enabled": false,
+    "created_at": "2025-05-30T00:00:00Z",
+    "user_type": "direct",
+    "departments": [
+      {
+        "department_id": 1,
+        "name": "Marketing",
+        "description": "Marketing department",
+        "created_at": "2025-05-30T00:00:00Z",
+        "updated_at": "2025-05-30T00:00:00Z"
+      }
+    ]
+  }
+  ```
+
+### Update User
+- **URL:** `/api/users/users/{id}/`
+- **Method:** `PUT`
+- **Auth Required:** Yes (Root Admin only or self)
+- **Body:**
+  ```json
+  {
+    "full_name": "Updated Name",
+    "email": "updated@example.com"
+  }
+  ```
+- **Response:** Same as get user detail
+
+### Delete User
+- **URL:** `/api/users/users/{id}/`
+- **Method:** `DELETE`
+- **Auth Required:** Yes (Root Admin only)
+- **Response:** Status 204 No Content
+
 ## Department Endpoints
 
 ### List Departments
@@ -182,6 +250,53 @@ This document outlines the API endpoints available for integration with your Nex
       }
     ]
   }
+  ```
+
+### Update Department
+- **URL:** `/api/departments/departments/{id}/`
+- **Method:** `PUT`
+- **Auth Required:** Yes (Root Admin or Department Admin)
+- **Body:**
+  ```json
+  {
+    "name": "Updated Marketing",
+    "description": "Updated marketing department description"
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "department_id": 1,
+    "name": "Updated Marketing",
+    "description": "Updated marketing department description",
+    "created_at": "2025-05-30T00:00:00Z",
+    "updated_at": "2025-06-15T00:00:00Z"
+  }
+  ```
+
+### Delete Department
+- **URL:** `/api/departments/departments/{id}/`
+- **Method:** `DELETE`
+- **Auth Required:** Yes (Root Admin only)
+- **Response:** Status 204 No Content
+
+### Get Current Admin Departments
+- **URL:** `/api/departments/me/admin/`
+- **Method:** `GET`
+- **Auth Required:** Yes (Department Admin)
+- **Response:**
+  ```json
+  [
+    {
+      "department_id": 1,
+      "name": "Marketing",
+      "description": "Marketing department",
+      "created_at": "2025-05-30T00:00:00Z",
+      "updated_at": "2025-05-30T00:00:00Z",
+      "admins": [ /* List of admin users */ ],
+      "users": [ /* List of regular users */ ]
+    }
+  ]
   ```
 
 ## Department Admin Management (Updated)
@@ -313,6 +428,28 @@ This document outlines the API endpoints available for integration with your Nex
   ]
   ```
 
+### Get Service Package Detail
+- **URL:** `/api/services/packages/{id}/`
+- **Method:** `GET`
+- **Auth Required:** Yes
+- **Response:**
+  ```json
+  {
+    "id": 1,
+    "name": "Basic Plan",
+    "description": "Basic service package",
+    "price": "9.99",
+    "billing_cycle": "monthly",
+    "features": {
+      "feature1": true,
+      "feature2": false
+    },
+    "is_active": true,
+    "created_at": "2025-05-30T00:00:00Z",
+    "updated_at": "2025-05-30T00:00:00Z"
+  }
+  ```
+
 ## Subscription Endpoints
 
 ### Create Subscription
@@ -360,6 +497,83 @@ This document outlines the API endpoints available for integration with your Nex
     }
   }
   ```
+
+### List Subscriptions
+- **URL:** `/api/services/subscriptions/`
+- **Method:** `GET`
+- **Auth Required:** Yes
+- **Response:**
+  ```json
+  [
+    {
+      "id": 1,
+      "department": 1,
+      "service_package": 1,
+      "status": "active",
+      "start_date": "2025-05-30",
+      "end_date": "2025-06-30",
+      "created_at": "2025-05-30T00:00:00Z",
+      "updated_at": "2025-05-30T00:00:00Z",
+      "department_details": {
+        "department_id": 1,
+        "name": "Marketing",
+        "description": "Marketing department",
+        "created_at": "2025-05-30T00:00:00Z",
+        "updated_at": "2025-05-30T00:00:00Z"
+      },
+      "service_package_details": {
+        "id": 1,
+        "name": "Basic Plan",
+        "description": "Basic service package",
+        "price": "9.99",
+        "billing_cycle": "monthly",
+        "features": {
+          "feature1": true,
+          "feature2": false
+        },
+        "is_active": true,
+        "created_at": "2025-05-30T00:00:00Z",
+        "updated_at": "2025-05-30T00:00:00Z"
+      }
+    }
+  ]
+  ```
+
+### Get Subscription Detail
+- **URL:** `/api/services/subscriptions/{id}/`
+- **Method:** `GET`
+- **Auth Required:** Yes
+- **Response:**
+  ```json
+  {
+    "id": 1,
+    "department": 1,
+    "service_package": 1,
+    "status": "active",
+    "start_date": "2025-05-30",
+    "end_date": "2025-06-30",
+    "created_at": "2025-05-30T00:00:00Z",
+    "updated_at": "2025-05-30T00:00:00Z",
+    "department_details": { /* Department details */ },
+    "service_package_details": { /* Service package details */ },
+    "users": [
+      {
+        "user_id": 4,
+        "email": "user@example.com",
+        "full_name": "Regular User",
+        "is_root_admin": false,
+        "mfa_enabled": false,
+        "created_at": "2025-05-30T00:00:00Z"
+      }
+    ]
+  }
+  ```
+
+### Cancel Subscription
+- **URL:** `/api/services/subscriptions/{id}/`
+- **Method:** `DELETE`
+- **Auth Required:** Yes (Department Admin or Root Admin)
+- **Response:** Status 204 No Content
 
 ## Service Access Endpoints
 
